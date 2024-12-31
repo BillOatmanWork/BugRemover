@@ -1,6 +1,7 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.Drawing;
 using System.Globalization;
+using System.IO;
 using OpenCvSharp;
 using OpenCvSharp.Extensions;
 using Zavolokas.ImageProcessing.Inpainting;
@@ -148,12 +149,32 @@ namespace BugRemover
             }
 
             string pixelFormat = GetVideoPixelFormat(ffmpegPath, inFile);
+            double fps = GetVideoFPS(ffmpegPath, inFile);
+            string framesDir = System.IO.Path.Combine(workingDir, "frames");
+            string maskedFramesDir = System.IO.Path.Combine(workingDir, "maskedframes");
+            string outputFile = $"{inFile.FullFileNameWithoutExtention()}_bugFree.mp4";
 
-            if (ExtractAllVideoFrames(inFile, ffmpegPath) == false)
+            Utilities.ConsoleWithLog("Extracting the original frames ...");
+            if (ExtractAllVideoFrames(inFile, framesDir, ffmpegPath) == false)
             {
                 Utilities.ConsoleWithLog("Error extracting frames.");
                 return;
             }
+
+            Utilities.ConsoleWithLog("Inpainting the original frames ...");
+            InpaintFrames(framesDir, maskedFramesDir, startX, startY, width, height);
+
+            Utilities.ConsoleWithLog("Reassembling to create the new video ...");
+            ReassembleVideo(ffmpegPath, maskedFramesDir, outputFile, fps, pixelFormat);
+
+            Utilities.ConsoleWithLog("Cleaning up ...");
+            //DirectoryInfo directory = new DirectoryInfo(framesDir);
+            //directory.Delete(true);
+
+            //DirectoryInfo directory2 = new DirectoryInfo(maskedFramesDir);
+            //directory2.Delete(true);
+
+            Utilities.ConsoleWithLog($"All done. {outputFile} created.");
         }
 
         private static bool ExtractSomeVideoFrames(string videoFilePath, string ffmpegPath, int frameCount)
@@ -182,11 +203,10 @@ namespace BugRemover
             return true;
         }
 
-        private static bool ExtractAllVideoFrames(string videoFilePath, string ffmpegPath)
+        private static bool ExtractAllVideoFrames(string videoFilePath, string outputDir, string ffmpegPath)
         {
-            //  string ffmpegArgs = $"-i \"{videoFilePath}\" -c copy -map 0:v -map 0:a \"{intermediateFilePath}\"";
-            string outputFile = $"{videoFilePath.FullFileNameWithoutExtention()}_extract_%08d.png";
-            string ffmpegArgs = $"-i \"{videoFilePath}\" \"{outputFile}\"";
+         //   string outputFile = $"{videoFilePath.FullFileNameWithoutExtention()}_extract_%08d.png";
+            string ffmpegArgs = $"-i \"{videoFilePath}\" \"{outputDir}\"\\framet_%08d.png";
 
             // Set up the process to run FFmpeg
             using (Process ffmpeg = new Process())
