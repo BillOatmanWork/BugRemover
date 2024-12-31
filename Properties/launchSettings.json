@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "BugRemover": {
+      "commandName": "Project",
+      "commandLineArgs": "-ffmpegpath=\"E:\\ffmpeg\\bin\" -infile=\"E:\\Personal Repos\\WinEDL\\Test\\SampleVideo_1280x720_20mb.mp4\""
+    }
+  }
+}
