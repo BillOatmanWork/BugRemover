@@ -1,0 +1,116 @@
+to get first 20 frames to get coordinates of the bug
+ffmpeg -i input_video.mp4 -vf "select='lte(n\,19)'" -vsync vfr -q:v 2 frames/output_%03d.jpg
+do this as an option, -extract=xx  extract xx frames and exit
+
+Install-Package OpenCvSharp4
+
+Install-Package Zavolokas.ImageProcessing.Inpainting -Version 2.0.0.1
+
+using System;
+using System.Diagnostics;
+using System.Drawing;
+using OpenCvSharp;
+using OpenCvSharp.Extensions;
+using Zavolokas.ImageProcessing.Inpainting;
+
+namespace VideoInpainting
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            string inputVideo = "input_video.mp4";
+            string outputVideo = "output_video.mp4";
+            string framesDir = "frames";
+            string maskedFramesDir = "masked_frames";
+            int startX = 100, startY = 100, width = 200, height = 50; // Coordinates of the static area
+
+            // Step 1: Extract frames from video
+            ExtractFrames(inputVideo, framesDir);
+
+            // Step 2: Inpaint frames
+            InpaintFrames(framesDir, maskedFramesDir, startX, startY, width, height);
+
+            // Step 3: Reassemble video
+            ReassembleVideo(maskedFramesDir, outputVideo);
+        }
+
+        static void ExtractFrames(string inputVideo, string outputDir)
+        {
+            if (!System.IO.Directory.Exists(outputDir))
+                System.IO.Directory.CreateDirectory(outputDir);
+
+            string ffmpegCommand = $"ffmpeg -i {inputVideo} -vf \"fps=30\" {outputDir}/frame_%04d.png";
+            RunCommand(ffmpegCommand);
+        }
+
+        static void InpaintFrames(string inputDir, string outputDir, int startX, int startY, int width, int height)
+        {
+            if (!System.IO.Directory.Exists(outputDir))
+                System.IO.Directory.CreateDirectory(outputDir);
+
+            var files = System.IO.Directory.GetFiles(inputDir, "frame_*.png");
+
+            foreach (var file in files)
+            {
+                using (var image = new Bitmap(file))
+                {
+                    var mask = CreateMask(image.Width, image.Height, startX, startY, width, height);
+                    var inpaintedImage = Inpaint(image, mask);
+
+                    string outputFilePath = System.IO.Path.Combine(outputDir, System.IO.Path.GetFileName(file));
+                    inpaintedImage.Save(outputFilePath);
+                }
+            }
+        }
+
+        static Bitmap CreateMask(int imgWidth, int imgHeight, int startX, int startY, int width, int height)
+        {
+            var mask = new Bitmap(imgWidth, imgHeight);
+            using (Graphics g = Graphics.FromImage(mask))
+            {
+                g.FillRectangle(Brushes.Black, 0, 0, imgWidth, imgHeight);
+                g.FillRectangle(Brushes.White, startX, startY, width, height);
+            }
+            return mask;
+        }
+
+        static Bitmap Inpaint(Bitmap image, Bitmap mask)
+        {
+            var src = BitmapConverter.ToMat(image);
+            var maskMat = BitmapConverter.ToMat(mask);
+            var inpaintedMat = new Mat();
+
+            Cv2.Inpaint(src, maskMat, inpaintedMat, 3, InpaintMethod.Telea);
+
+            return BitmapConverter.ToBitmap(inpaintedMat);
+        }
+
+        static void ReassembleVideo(string inputDir, string outputVideo)
+        {
+            string ffmpegCommand = $"ffmpeg -framerate 30 -i {inputDir}/frame_%04d.png -c:v libx264 -pix_fmt yuv420p {outputVideo}";
+            RunCommand(ffmpegCommand);
+        }
+
+        static void RunCommand(string command)
+        {
+            var process = new Process
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = "cmd.exe",
+                    Arguments = $"/C {command}",
+                    RedirectStandardOutput = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                }
+            };
+
+            process.Start();
+            process.WaitForExit();
+        }
+    }
+}
+
+
+
