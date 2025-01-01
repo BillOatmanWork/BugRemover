@@ -8,6 +8,8 @@ using Zavolokas.ImageProcessing.Inpainting;
 
 namespace BugRemover
 {
+
+    // Switch to 
     public class BugRemover
     {
         public string workingDir = AppContext.BaseDirectory;
@@ -152,6 +154,13 @@ namespace BugRemover
             double fps = GetVideoFPS(ffmpegPath, inFile);
             string framesDir = System.IO.Path.Combine(workingDir, "frames");
             string maskedFramesDir = System.IO.Path.Combine(workingDir, "maskedframes");
+
+            if (!System.IO.Directory.Exists(framesDir))
+                System.IO.Directory.CreateDirectory(framesDir);
+
+            if (!System.IO.Directory.Exists(maskedFramesDir))
+                System.IO.Directory.CreateDirectory(maskedFramesDir);
+
             string outputFile = $"{inFile.FullFileNameWithoutExtention()}_bugFree.mp4";
 
             Utilities.ConsoleWithLog("Extracting the original frames ...");
@@ -168,11 +177,11 @@ namespace BugRemover
             ReassembleVideo(ffmpegPath, maskedFramesDir, outputFile, fps, pixelFormat);
 
             Utilities.ConsoleWithLog("Cleaning up ...");
-            //DirectoryInfo directory = new DirectoryInfo(framesDir);
-            //directory.Delete(true);
+            DirectoryInfo directory = new DirectoryInfo(framesDir);
+            directory.Delete(true);
 
-            //DirectoryInfo directory2 = new DirectoryInfo(maskedFramesDir);
-            //directory2.Delete(true);
+            DirectoryInfo directory2 = new DirectoryInfo(maskedFramesDir);
+            directory2.Delete(true);
 
             Utilities.ConsoleWithLog($"All done. {outputFile} created.");
         }
@@ -206,7 +215,7 @@ namespace BugRemover
         private static bool ExtractAllVideoFrames(string videoFilePath, string outputDir, string ffmpegPath)
         {
          //   string outputFile = $"{videoFilePath.FullFileNameWithoutExtention()}_extract_%08d.png";
-            string ffmpegArgs = $"-i \"{videoFilePath}\" \"{outputDir}\"\\framet_%08d.png";
+            string ffmpegArgs = $"-i \"{videoFilePath}\" \"{outputDir}\"\\frame_%08d.png";
 
             // Set up the process to run FFmpeg
             using (Process ffmpeg = new Process())
@@ -228,49 +237,52 @@ namespace BugRemover
             return true;
         }
 
-        static void InpaintFrames(string inputDir, string outputDir, int startX, int startY, int width, int height)
+static void InpaintFrames(string inputDir, string outputDir, int startX, int startY, int width, int height)
+    {
+        if (!System.IO.Directory.Exists(outputDir))
+            System.IO.Directory.CreateDirectory(outputDir);
+
+        var files = System.IO.Directory.GetFiles(inputDir, "frame_*.png");
+
+        foreach (var file in files)
         {
-            if (!System.IO.Directory.Exists(outputDir))
-                System.IO.Directory.CreateDirectory(outputDir);
-
-            var files = System.IO.Directory.GetFiles(inputDir, "frame_*.png");
-
-            foreach (var file in files)
+            using (var image = new Bitmap(file))
             {
-                using (var image = new Bitmap(file))
-                {
-                    var mask = CreateMask(image.Width, image.Height, startX, startY, width, height);
-                    var inpaintedImage = Inpaint(image, mask);
+                var mask = CreateMask(image, startX, startY, width, height);
+                var inpaintedImage = Inpaint(image, mask);
 
-                    string outputFilePath = System.IO.Path.Combine(outputDir, System.IO.Path.GetFileName(file));
-                    inpaintedImage.Save(outputFilePath);
-                }
+                string outputFilePath = System.IO.Path.Combine(outputDir, System.IO.Path.GetFileName(file));
+                inpaintedImage.Save(outputFilePath);
             }
         }
+    }
 
-        static Bitmap CreateMask(int imgWidth, int imgHeight, int startX, int startY, int width, int height)
-        {
-            var mask = new Bitmap(imgWidth, imgHeight);
-            using (Graphics g = Graphics.FromImage(mask))
-            {
-                g.FillRectangle(Brushes.Black, 0, 0, imgWidth, imgHeight);
-                g.FillRectangle(Brushes.White, startX, startY, width, height);
-            }
-            return mask;
-        }
+    static Mat CreateMask(Bitmap image, int startX, int startY, int width, int height)
+    {
+        var mask = new Mat(image.Height, image.Width, MatType.CV_8UC1, Scalar.Black); // Create an 8-bit, 1-channel Mat
+        Cv2.Rectangle(mask, new OpenCvSharp.Point(startX, startY), new OpenCvSharp.Point(startX + width, startY + height), Scalar.White, -1); // Fill the rectangle with white color
+        return mask;
+    }
 
-        static Bitmap Inpaint(Bitmap image, Bitmap mask)
-        {
-            var src = BitmapConverter.ToMat(image);
-            var maskMat = BitmapConverter.ToMat(mask);
-            var inpaintedMat = new Mat();
+    static Bitmap Inpaint(Bitmap image, Mat maskMat)
+    {
+        // Convert the Bitmap image to Mat
+        var src = BitmapConverter.ToMat(image);
 
-            Cv2.Inpaint(src, maskMat, inpaintedMat, 3, InpaintMethod.Telea);
+        // Apply Gaussian Blur
+        var blurredMat = new Mat();
+        Cv2.GaussianBlur(src, blurredMat, new OpenCvSharp.Size(5, 5), 0);
 
-            return BitmapConverter.ToBitmap(inpaintedMat);
-        }
+        // Perform inpainting with an increased radius
+        var inpaintedMat = new Mat();
+     //   Cv2.Inpaint(blurredMat, maskMat, inpaintedMat, 10, InpaintMethod.Telea);
+         Cv2.Inpaint(blurredMat, maskMat, inpaintedMat, 10, InpaintMethod.NS); 
 
-        static void ReassembleVideo(string ffmpegPath, string inputDir, string outputVideo, double frameRate, string pixelFormat)
+        // Convert the inpainted Mat back to Bitmap
+        return BitmapConverter.ToBitmap(inpaintedMat);
+    }
+
+    static void ReassembleVideo(string ffmpegPath, string inputDir, string outputVideo, double frameRate, string pixelFormat)
         { 
             string ffmpegArgs = $"ffmpeg -framerate {frameRate} -i {inputDir}/frame_%08d.png -c:v libx264 -pix_fmt {pixelFormat} {outputVideo}";
             using (Process ffmpeg = new Process())
