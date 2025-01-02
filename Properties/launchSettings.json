@@ -2,7 +2,7 @@
   "profiles": {
     "BugRemover": {
       "commandName": "Project",
-      "commandLineArgs": "-ffmpegpath=\"C:\\ffmpeg\\bin\" -infile=\"C:\\Stuff\\Recordings\\SidneyB Playing.mkv\" -startx=527 -starty=410 -width=303 -height=45"
+      "commandLineArgs": "-ffmpegpath=\"E:\\ffmpeg\\bin\" -infile=\"E:\\Personal Repos\\WinEDL\\Test\\SampleVideo_1280x720_20mb.mp4\" -startx=527 -starty=410 -width=303 -height=45"
     }
   }
 }
