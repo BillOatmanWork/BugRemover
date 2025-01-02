@@ -1,9 +1,8 @@
+using System;
 using System.Diagnostics;
 using System.Drawing;
 using System.Globalization;
-using System.IO;
 using OpenCvSharp;
-using OpenCvSharp.Extensions;
 
 namespace BugRemover
 {
@@ -130,6 +129,13 @@ namespace BugRemover
             if (paramsOK == false)
                 return;
 
+            if(!File.Exists(inFile))
+            {
+                Utilities.ConsoleWithLog($"{inFile} not found.");
+                DisplayHelp();
+                return;
+            }
+
             if (doExtract)
             {
                 Utilities.ConsoleWithLog($"Extracting {framesToExtract} frames.");
@@ -142,7 +148,7 @@ namespace BugRemover
                 }
 
                 if (ExtractSomeVideoFrames(inFile, framesToExtract))
-                    Utilities.ConsoleWithLog($"{framesToExtract} frames extracted successfully.");
+                    Utilities.ConsoleWithLog($"{framesToExtract} frames extracted successfully to {Path.GetDirectoryName(inFile)}.");
                 else
                     Utilities.ConsoleWithLog("Error extracting frames.");
 
@@ -163,11 +169,11 @@ namespace BugRemover
             string outputFile = $"{inFile.FullFileNameWithoutExtention()}_bugFree.mp4";
 
             Utilities.ConsoleWithLog("Extracting the original frames ...");
-            if (ExtractAllVideoFrames(inFile, framesDir) == false)
-            {
-                Utilities.ConsoleWithLog("Error extracting frames.");
-                return;
-            }
+            //if (ExtractAllVideoFrames(inFile, framesDir) == false)
+            //{
+            //    Utilities.ConsoleWithLog("Error extracting frames.");
+            //    return;
+            //}
 
             Utilities.ConsoleWithLog("Inpainting the original frames ...");
             InpaintFrames(framesDir, maskedFramesDir, startX, startY, width, height);
@@ -211,6 +217,7 @@ namespace BugRemover
                 System.IO.Directory.CreateDirectory(outputDir);
 
             var files = System.IO.Directory.GetFiles(inputDir, "frame_*.png");
+           
 
             foreach (var file in files)
             {
@@ -218,11 +225,15 @@ namespace BugRemover
 
                     // Create a mask
                     Mat mask = new Mat(src.Size(), MatType.CV_8UC1);
-                    Cv2.Rectangle(mask, new Rect(startX, startY, width, height), Scalar.White, -1);
+              //  Mat mask2 = new Mat(src.Size(), MatType.CV_8UC1);
+                Cv2.Rectangle(mask, new Rect(startX, startY, width, height), Scalar.White, -1);
 
-                    // Inpaint the image
-                    Mat dst = new Mat();
-                    //  Cv2.Inpaint(src, mask, dst, 3, InpaintMethod.Telea);
+                //string outputFilePathMask = System.IO.Path.Combine("c:\\TestData", System.IO.Path.GetFileName(file));
+                //Cv2.ImWrite(outputFilePathMask, mask);
+
+                // Inpaint the image
+                Mat dst = new Mat();
+                    //  Cv2.Inpaint(src, mask, dst, 5, InpaintMethod.Telea);
                     Cv2.Inpaint(src, mask, dst, 3, InpaintMethod.NS);
 
                     // Save the result

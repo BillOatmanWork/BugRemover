@@ -1,89 +1,46 @@
-using System.Drawing;
-using System.IO;
-using Zavolokas.ImageProcessing.Inpainting;
-using Zavolokas.ImageProcessing.Inpainting.Services.ImageFiller;
 
-static void InpaintFrames(string inputDir, string outputDir, int startX, int startY, int width, int height)
+Install-Package Zavolokas.Inpainting
+
+
+using Zavolokas.Inpainting;
+
+private static void InpaintFrames(string inputDir, string outputDir, int startX, int startY, int width, int height)
 {
-    if (!Directory.Exists(outputDir))
-        Directory.CreateDirectory(outputDir);
+    if (!System.IO.Directory.Exists(outputDir))
+        System.IO.Directory.CreateDirectory(outputDir);
 
-    var files = Directory.GetFiles(inputDir, "frame_*.png");
-
+    var files = System.IO.Directory.GetFiles(inputDir, "frame_*.png");
+    
     foreach (var file in files)
     {
-        using (var image = new Bitmap(file))
+        // Read the image
+        using (var bitmap = new Bitmap(file))
         {
-            var mask = CreateMask(image, startX, startY, width, height);
-            var inpaintedImage = Inpaint(image, mask);
+            var imageArgb = bitmap.ToArgbBytes();
+            var maskArgb = CreateMask(imageArgb.Width, imageArgb.Height, startX, startY, width, height);
+            var donors = new Mask(maskArgb).Dilate().GetPoints();
 
-            string outputFilePath = Path.Combine(outputDir, Path.GetFileName(file));
-            inpaintedImage.Save(outputFilePath);
+            // Inpaint the image
+            var inpainter = new Inpainter();
+            var result = inpainter.Inpaint(imageArgb, maskArgb, donors);
+            
+            // Save the result
+            var resultBitmap = result.FromArgbToBitmap();
+            string outputFilePath = System.IO.Path.Combine(outputDir, System.IO.Path.GetFileName(file));
+            resultBitmap.Save(outputFilePath, System.Drawing.Imaging.ImageFormat.Png);
         }
     }
 }
 
-static Bitmap Inpaint(Bitmap image, Bitmap mask)
+private static byte[] CreateMask(int imageWidth, int imageHeight, int startX, int startY, int width, int height)
 {
-    // Convert the Bitmap image and mask to ZsImage
-    var zsImage = image.ToZsImage();
-    var zsMask = mask.ToZsImage();
-
-    // Perform inpainting using Zavolokas' Inpainting library
-    var inpaintedImage = new Bitmap(image.Width, image.Height);
-    using (var graphics = Graphics.FromImage(inpaintedImage))
+    var mask = new byte[imageWidth * imageHeight];
+    for (int y = startY; y < startY + height; y++)
     {
-        var zsImageInpainted = zsImage.Clone() as ZsImage;
-        zsImageInpainted.Inpaint(zsMask);
-        graphics.DrawImage(zsImageInpainted.ToBitmap(), 0, 0);
-    }
-
-    return inpaintedImage;
-}
-
-static Bitmap CreateMask(Bitmap image, int startX, int startY, int width, int height)
-{
-    var mask = new Bitmap(image.Width, image.Height);
-    using (var graphics = Graphics.FromImage(mask))
-    {
-        graphics.FillRectangle(Brushes.Black, 0, 0, mask.Width, mask.Height);
-        graphics.FillRectangle(Brushes.White, startX, startY, width, height);
+        for (int x = startX; x < startX + width; x++)
+        {
+            mask[y * imageWidth + x] = 255; // Mark the rectangular area
+        }
     }
     return mask;
-}
-
-static ZsImage ToZsImage(this Bitmap bitmap)
-{
-    // Convert Bitmap to byte array
-    var bytes = new byte[bitmap.Width * bitmap.Height * 4];
-    var bitmapData = bitmap.LockBits(
-        new Rectangle(0, 0, bitmap.Width, bitmap.Height),
-        System.Drawing.Imaging.ImageLockMode.ReadOnly,
-        System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-    System.Runtime.InteropServices.Marshal.Copy(bitmapData.Scan0, bytes, 0, bytes.Length);
-    bitmap.UnlockBits(bitmapData);
-
-    // Convert byte array to ZsImage
-    var zsImage = ZsImage.Create<byte>(bitmap.Width, bitmap.Height, 4);
-    zsImage.SetData(bytes, 0, bytes.Length);
-
-    return zsImage;
-}
-
-static Bitmap ToBitmap(this ZsImage zsImage)
-{
-    // Convert ZsImage to byte array
-    var bytes = new byte[zsImage.Width * zsImage.Height * 4];
-    zsImage.GetData(bytes);
-
-    // Convert byte array to Bitmap
-    var bitmap = new Bitmap(zsImage.Width, zsImage.Height);
-    var bitmapData = bitmap.LockBits(
-        new Rectangle(0, 0, bitmap.Width, bitmap.Height),
-        System.Drawing.Imaging.ImageLockMode.WriteOnly,
-        System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-    System.Runtime.InteropServices.Marshal.Copy(bytes, 0, bitmapData.Scan0, bytes.Length);
-    bitmap.UnlockBits(bitmapData);
-
-    return bitmap;
 }

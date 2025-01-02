@@ -2,7 +2,7 @@
   "profiles": {
     "BugRemover": {
       "commandName": "Project",
-      "commandLineArgs": "-ffmpegpath=\"E:\\ffmpeg\\bin\" -infile=\"E:\\Personal Repos\\WinEDL\\Test\\SampleVideo_1280x720_20mb.mp4\" -startx=527 -starty=410 -width=303 -height=45"
+      "commandLineArgs": "-ffmpegpath=\"C:\\ffmpeg\\bin\" -infile=\"C:\\Stuff\\Recordings\\Molly Cooper Gives Best Friend JOI.mkv\" -startx=623 -starty=425 -width=218 -height=33 "
     }
   }
 }
