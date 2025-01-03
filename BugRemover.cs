@@ -217,30 +217,71 @@ namespace BugRemover
                 System.IO.Directory.CreateDirectory(outputDir);
 
             var files = System.IO.Directory.GetFiles(inputDir, "frame_*.png");
-           
 
             foreach (var file in files)
             {
-                    Mat src = Cv2.ImRead(file, ImreadModes.Color);
+                //  Mat src = Cv2.ImRead(file, ImreadModes.Color);
+                Mat src = Cv2.ImRead(file, ImreadModes.AnyDepth | ImreadModes.AnyColor);
 
-                    // Create a mask
-                    Mat mask = new Mat(src.Size(), MatType.CV_8UC1);
-              //  Mat mask2 = new Mat(src.Size(), MatType.CV_8UC1);
+                // Create a mask
+                Mat mask = new Mat(src.Size(), MatType.CV_8UC1);
                 Cv2.Rectangle(mask, new Rect(startX, startY, width, height), Scalar.White, -1);
 
-                //string outputFilePathMask = System.IO.Path.Combine("c:\\TestData", System.IO.Path.GetFileName(file));
-                //Cv2.ImWrite(outputFilePathMask, mask);
+                Mat dst = src.Clone();
 
-                // Inpaint the image
-                Mat dst = new Mat();
-                    //  Cv2.Inpaint(src, mask, dst, 5, InpaintMethod.Telea);
-                    Cv2.Inpaint(src, mask, dst, 3, InpaintMethod.NS);
+                // Define gridSize as a local variable
+                int gridSize = 50; // Adjust this value as needed
 
-                    // Save the result
-                    string outputFilePath = System.IO.Path.Combine(outputDir, System.IO.Path.GetFileName(file));
-                    Cv2.ImWrite(outputFilePath, dst);
+                // Iteratively inpaint smaller sections
+                for (int y = startY; y < startY + height; y += gridSize)
+                {
+                    for (int x = startX; x < startX + width; x += gridSize)
+                    {
+                        Rect rect = new Rect(x, y, Math.Min(gridSize, startX + width - x), Math.Min(gridSize, startY + height - y));
+                        Mat srcROI = new Mat(src, rect);
+                        Mat maskROI = new Mat(mask, rect);
+                        Mat dstROI = new Mat(dst, rect);
+
+                        Cv2.Inpaint(srcROI, maskROI, dstROI, 3, InpaintMethod.NS);
+                    }
                 }
+
+                // Save the result
+                string outputFilePath = System.IO.Path.Combine(outputDir, System.IO.Path.GetFileName(file));
+                Cv2.ImWrite(outputFilePath, dst);
+            }
         }
+
+        //private static void InpaintFrames(string inputDir, string outputDir, int startX, int startY, int width, int height)
+        //{
+        //    if (!System.IO.Directory.Exists(outputDir))
+        //        System.IO.Directory.CreateDirectory(outputDir);
+
+        //    var files = System.IO.Directory.GetFiles(inputDir, "frame_*.png");
+
+
+        //    foreach (var file in files)
+        //    {
+        //            Mat src = Cv2.ImRead(file, ImreadModes.Color);
+
+        //            // Create a mask
+        //            Mat mask = new Mat(src.Size(), MatType.CV_8UC1);
+        //      //  Mat mask2 = new Mat(src.Size(), MatType.CV_8UC1);
+        //        Cv2.Rectangle(mask, new Rect(startX, startY, width, height), Scalar.White, -1);
+
+        //        //string outputFilePathMask = System.IO.Path.Combine("c:\\TestData", System.IO.Path.GetFileName(file));
+        //        //Cv2.ImWrite(outputFilePathMask, mask);
+
+        //        // Inpaint the image
+        //        Mat dst = new Mat();
+        //            //  Cv2.Inpaint(src, mask, dst, 5, InpaintMethod.Telea);
+        //            Cv2.Inpaint(src, mask, dst, 3, InpaintMethod.NS);
+
+        //            // Save the result
+        //            string outputFilePath = System.IO.Path.Combine(outputDir, System.IO.Path.GetFileName(file));
+        //            Cv2.ImWrite(outputFilePath, dst);
+        //        }
+        //}
 
         private void ReassembleVideo(string inputDir, string outputVideo, double frameRate, string pixelFormat)
         { 
