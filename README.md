@@ -1,5 +1,5 @@
 # BugRemover
-BugRemover is a command line utility to generate subtitles for a video file and optionally put into a MKV container. It is written in C# with executables available for multiple operating systems.
+BugRemover is a command line utility to remove bugs (logos) from video files. It is written in C# with executables available for multiple operating systems.
 It uses [ffmpeg](https://ffmpeg.org) to generate the subtitles.
 
 ## Installation
