@@ -76,6 +76,12 @@ namespace BugRemover
 
                     case "-infile":
                         inFile = arg.Substring(arg.IndexOf('=') + 1).Trim();
+                        if(!File.Exists($"{inFile}"))
+                        {
+                            Utilities.ConsoleWithLog($"Input file specified not found {inFile}.");
+                            DisplayHelp();
+                            return;
+                        }
                         break;
 
                     case "-startx":
@@ -132,12 +138,15 @@ namespace BugRemover
             if (paramsOK == false)
                 return;
 
-            if(!File.Exists(inFile))
+            if(startX == -1 || startY == -1 || width == -1 || height == -1)
             {
-                Utilities.ConsoleWithLog($"{inFile} not found.");
+                Utilities.ConsoleWithLog("startX, startY, width and height must all be specified.");
                 DisplayHelp();
                 return;
             }
+
+            Utilities.ConsoleWithLog($"ffmpeg Path: {_ffmpegPath}");
+            Utilities.ConsoleWithLog($"Input File: {inFile}");
 
             if (doExtract)
             {
@@ -158,11 +167,16 @@ namespace BugRemover
                 return;
             }
 
-            string outputFile = $"{inFile.FullFileNameWithoutExtention()}_bugFree.mp4";
+            Utilities.ConsoleWithLog($"Bug Starting X: {startX}");
+            Utilities.ConsoleWithLog($"Bug Starting Y: {startY}");
+            Utilities.ConsoleWithLog($"Bug Height: {height}");
+            Utilities.ConsoleWithLog($"Bug Width: {width}");
+
+            string outputFile = $"{inFile.FullFileNameWithoutExtention()}_bugFree.mkv";
 
             Utilities.ConsoleWithLog("Starting the bug removal process ...");
 
-            RemoveTheBug(inFile, startX, startY, width, height);
+            RemoveTheBug(inFile, outputFile, startX, startY, width, height);
 
             Utilities.ConsoleWithLog($"All done. {outputFile} created.");
         }
@@ -187,10 +201,9 @@ namespace BugRemover
         /// <param name="height"></param>
         /// <returns></returns>
         /// <see cref="https://www.ffmpegtoolkit.com/2021/07/23/remove-station-logo-from-video-using-ffmpeg/"/>
-        private bool RemoveTheBug(string videoFilePath, int startX, int startY, int width, int height)
+        private bool RemoveTheBug(string videoFilePath, string outputFile, int startX, int startY, int width, int height)
         {
             // For debugging, show=1 draws a green box around the bug and -t 15 to only apply to the first 15 seconds of the video
-            string outputFile = $"{videoFilePath.FullFileNameWithoutExtention()}_BugFree.mkv";
             string ffmpegArgs = $"-i \"{videoFilePath}\" -vf delogo=x={startX}:y={startY}:w={width}:h={height}:show=0 -c:a copy -c:s copy -map 0 -map -0:s:m:language:iso639-2 \"{outputFile}\"";
 
             RunFfmpeg(ffmpegArgs);
