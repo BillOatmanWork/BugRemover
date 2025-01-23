@@ -13,7 +13,7 @@ It uses [ffmpeg](https://ffmpeg.org) to generate the subtitles.
 - -startY=y Defines the upper left y-axis position of the square with the bug.
 - -width=w Defines the width of the square containing the bug.
 - -height=h Defines the height of the square containing the bug.
-- Optional: -extract=frameCount Extracts frameCount frames to assist in figure out the bug position parameters. If this is specified, only te extraction happens.
+- Optional: -extract=frameCount Extracts frameCount frames to assist in figure out the bug position parameters. If this is specified, only the extraction happens.
   
 ## Note
 BugRemover is CharityWare. If you like this program and find it of value, please consider making a donation to a local charity that benefits children such as Special Olympics. 
