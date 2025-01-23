@@ -66,6 +66,12 @@ namespace BugRemover
 
                     case "-ffmpegpath":
                         _ffmpegPath = arg.Substring(arg.IndexOf('=') + 1).Trim();
+                        if(!File.Exists($"{_ffmpegPath}\\ffmpeg.exe"))
+                        {
+                            Utilities.ConsoleWithLog($"ffmpeg not found at the specified path {_ffmpegPath}.");
+                            DisplayHelp();
+                            return;
+                        }
                         break;
 
                     case "-infile":
@@ -222,7 +228,7 @@ namespace BugRemover
             Utilities.ConsoleWithLog("");
             Utilities.ConsoleWithLog("Parameters:");
             Utilities.ConsoleWithLog("  -extract=frameCount\t(Optional) Extracts frameCount frames to assist in figure out the bug position parameters.");
-            Utilities.ConsoleWithLog("  -ffmpegPath=path\tThe path of the ffmpeg executable.");
+            Utilities.ConsoleWithLog("  -ffmpegPath=path\tThe path of the ffmpeg executable. The path only, not the file name.");
             Utilities.ConsoleWithLog("  -startX=x\t\tDefines the upper left x-axis position of the square with the bug.");
             Utilities.ConsoleWithLog("  -startY=y\t\tDefines the upper left y-axis position of the square with the bug.");
             Utilities.ConsoleWithLog("  -width=w\t\tDefines the width of the square containing the bug.");
