@@ -171,6 +171,7 @@ namespace BugRemover
             Utilities.ConsoleWithLog($"Bug Starting Y: {startY}");
             Utilities.ConsoleWithLog($"Bug Height: {height}");
             Utilities.ConsoleWithLog($"Bug Width: {width}");
+            Utilities.ConsoleWithLog("");
 
             string outputFile = $"{inFile.FullFileNameWithoutExtention()}_bugFree.mkv";
 
