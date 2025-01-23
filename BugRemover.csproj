@@ -9,21 +9,12 @@
 
   <ItemGroup>
     <Compile Remove="BugRemover - opencv.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Doc\" />
+    <Compile Remove="Doc\InpaintSample.cs" />
   </ItemGroup>
 
   <ItemGroup>
     <None Include="BugRemover - opencv.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="OpenCvSharp4" Version="4.10.0.20241108" />
-    <PackageReference Include="OpenCvSharp4.Extensions" Version="4.10.0.20241108" />
-    <PackageReference Include="OpenCvSharp4.runtime.win" Version="4.10.0.20241108" />
-    <PackageReference Include="System.Drawing.Common" Version="9.0.0" />
+    <None Include="Doc\InpaintSample.cs" />
   </ItemGroup>
 
 </Project>

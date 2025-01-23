@@ -1,8 +1,6 @@
-using System;
 using System.Diagnostics;
-using System.Drawing;
 using System.Globalization;
-using OpenCvSharp;
+
 
 namespace BugRemover
 {
@@ -10,7 +8,6 @@ namespace BugRemover
     // Switch to 
     public class BugRemover
     {
-        private readonly string _workingDir = AppContext.BaseDirectory;
         private string _ffmpegPath = string.Empty;
 
         static void Main(string[] args)
@@ -36,7 +33,7 @@ namespace BugRemover
         
             string inFile = string.Empty;
             int framesToExtract = 0;
-            bool found = false;
+            bool found;
             int startX = -1;
             int startY = -1;
             int width = -1;
@@ -155,38 +152,11 @@ namespace BugRemover
                 return;
             }
 
-            string pixelFormat = GetVideoPixelFormat(inFile);
-            double fps = GetVideoFPS(inFile);
-            string framesDir = System.IO.Path.Combine(_workingDir, "frames");
-            string maskedFramesDir = System.IO.Path.Combine(_workingDir, "maskedframes");
-
-            if (!System.IO.Directory.Exists(framesDir))
-                System.IO.Directory.CreateDirectory(framesDir);
-
-            if (!System.IO.Directory.Exists(maskedFramesDir))
-                System.IO.Directory.CreateDirectory(maskedFramesDir);
-
             string outputFile = $"{inFile.FullFileNameWithoutExtention()}_bugFree.mp4";
 
-            Utilities.ConsoleWithLog("Extracting the original frames ...");
-            //if (ExtractAllVideoFrames(inFile, framesDir) == false)
-            //{
-            //    Utilities.ConsoleWithLog("Error extracting frames.");
-            //    return;
-            //}
+            Utilities.ConsoleWithLog("Starting the bug removal process ...");
 
-            Utilities.ConsoleWithLog("Inpainting the original frames ...");
-            InpaintFrames(framesDir, maskedFramesDir, startX, startY, width, height);
-
-            Utilities.ConsoleWithLog("Reassembling to create the new video ...");
-            ReassembleVideo(maskedFramesDir, outputFile, fps, pixelFormat);
-
-            Utilities.ConsoleWithLog("Cleaning up ...");
-            DirectoryInfo directory = new DirectoryInfo(framesDir);
-            directory.Delete(true);
-
-            DirectoryInfo directory2 = new DirectoryInfo(maskedFramesDir);
-            directory2.Delete(true);
+            RemoveTheBug(inFile, startX, startY, width, height);
 
             Utilities.ConsoleWithLog($"All done. {outputFile} created.");
         }
@@ -201,157 +171,25 @@ namespace BugRemover
             return true;
         }
 
-        private bool ExtractAllVideoFrames(string videoFilePath, string outputDir)
+        /// <summary>
+        /// Remove the bug (logo) from the video file.
+        /// </summary>
+        /// <param name="videoFilePath"></param>
+        /// <param name="startX"></param>
+        /// <param name="startY"></param>
+        /// <param name="width"></param>
+        /// <param name="height"></param>
+        /// <returns></returns>
+        /// <see cref="https://www.ffmpegtoolkit.com/2021/07/23/remove-station-logo-from-video-using-ffmpeg/"/>
+        private bool RemoveTheBug(string videoFilePath, int startX, int startY, int width, int height)
         {
-         //   string outputFile = $"{videoFilePath.FullFileNameWithoutExtention()}_extract_%08d.png";
-            string ffmpegArgs = $"-i \"{videoFilePath}\" \"{outputDir}\"\\frame_%08d.png";
+            // For debugging, show=1 draws a green box around the bug and -t 15 to only apply to the first 15 seconds of the video
+            string outputFile = $"{videoFilePath.FullFileNameWithoutExtention()}_BugFree.mkv";
+            string ffmpegArgs = $"-i \"{videoFilePath}\" -vf delogo=x={startX}:y={startY}:w={width}:h={height}:show=0 -c:a copy -c:s copy -map 0 -map -0:s:m:language:iso639-2 \"{outputFile}\"";
 
             RunFfmpeg(ffmpegArgs);
 
             return true;
-        }
-
-        private static void InpaintFrames(string inputDir, string outputDir, int startX, int startY, int width, int height)
-        {
-            if (!System.IO.Directory.Exists(outputDir))
-                System.IO.Directory.CreateDirectory(outputDir);
-
-            var files = System.IO.Directory.GetFiles(inputDir, "frame_*.png");
-
-            foreach (var file in files)
-            {
-                //  Mat src = Cv2.ImRead(file, ImreadModes.Color);
-                Mat src = Cv2.ImRead(file, ImreadModes.AnyDepth | ImreadModes.AnyColor);
-
-                // Create a mask
-                Mat mask = new Mat(src.Size(), MatType.CV_8UC1);
-                Cv2.Rectangle(mask, new Rect(startX, startY, width, height), Scalar.White, -1);
-
-                Mat dst = src.Clone();
-
-                // Define gridSize as a local variable
-                int gridSize = 50; // Adjust this value as needed
-
-                // Iteratively inpaint smaller sections
-                for (int y = startY; y < startY + height; y += gridSize)
-                {
-                    for (int x = startX; x < startX + width; x += gridSize)
-                    {
-                        Rect rect = new Rect(x, y, Math.Min(gridSize, startX + width - x), Math.Min(gridSize, startY + height - y));
-                        Mat srcROI = new Mat(src, rect);
-                        Mat maskROI = new Mat(mask, rect);
-                        Mat dstROI = new Mat(dst, rect);
-
-                        Cv2.Inpaint(srcROI, maskROI, dstROI, 3, InpaintMethod.NS);
-                    }
-                }
-
-                // Save the result
-                string outputFilePath = System.IO.Path.Combine(outputDir, System.IO.Path.GetFileName(file));
-                Cv2.ImWrite(outputFilePath, dst);
-            }
-        }
-
-        //private static void InpaintFrames(string inputDir, string outputDir, int startX, int startY, int width, int height)
-        //{
-        //    if (!System.IO.Directory.Exists(outputDir))
-        //        System.IO.Directory.CreateDirectory(outputDir);
-
-        //    var files = System.IO.Directory.GetFiles(inputDir, "frame_*.png");
-
-
-        //    foreach (var file in files)
-        //    {
-        //            Mat src = Cv2.ImRead(file, ImreadModes.Color);
-
-        //            // Create a mask
-        //            Mat mask = new Mat(src.Size(), MatType.CV_8UC1);
-        //      //  Mat mask2 = new Mat(src.Size(), MatType.CV_8UC1);
-        //        Cv2.Rectangle(mask, new Rect(startX, startY, width, height), Scalar.White, -1);
-
-        //        //string outputFilePathMask = System.IO.Path.Combine("c:\\TestData", System.IO.Path.GetFileName(file));
-        //        //Cv2.ImWrite(outputFilePathMask, mask);
-
-        //        // Inpaint the image
-        //        Mat dst = new Mat();
-        //            //  Cv2.Inpaint(src, mask, dst, 5, InpaintMethod.Telea);
-        //            Cv2.Inpaint(src, mask, dst, 3, InpaintMethod.NS);
-
-        //            // Save the result
-        //            string outputFilePath = System.IO.Path.Combine(outputDir, System.IO.Path.GetFileName(file));
-        //            Cv2.ImWrite(outputFilePath, dst);
-        //        }
-        //}
-
-        private void ReassembleVideo(string inputDir, string outputVideo, double frameRate, string pixelFormat)
-        { 
-            string ffmpegArgs = $"-framerate {frameRate} -i \"{inputDir}/frame_%08d.png\" -c:v libx264 -pix_fmt {pixelFormat} \"{outputVideo}\"";
-            using (Process ffmpeg = new Process())
-            {
-                ffmpeg.StartInfo.FileName = $"\"{_ffmpegPath}\\ffmpeg\"";
-                ffmpeg.StartInfo.Arguments = ffmpegArgs;
-                ffmpeg.StartInfo.RedirectStandardError = true;
-                ffmpeg.StartInfo.UseShellExecute = false;
-                ffmpeg.StartInfo.CreateNoWindow = true;
-
-                // Start the process
-                ffmpeg.Start();
-
-                // Read the output
-                string output = ffmpeg.StandardError.ReadToEnd();
-                ffmpeg.WaitForExit();
-            }
-        }
-
-        private double GetVideoFPS(string videoFilePath)
-        {
-            var process = new Process
-            {
-                StartInfo = new ProcessStartInfo
-                {
-                    FileName = Path.Combine(_ffmpegPath, "ffprobe"),
-                    Arguments = $"-v error -select_streams v:0 -show_entries stream=r_frame_rate -of default=noprint_wrappers=1:nokey=1 \"{videoFilePath}\"",
-                    RedirectStandardOutput = true,
-                    UseShellExecute = false,
-                    CreateNoWindow = true
-                }
-            };
-
-            process.Start();
-            string output = process.StandardOutput.ReadToEnd().Trim();
-            process.WaitForExit();
-
-            // Parse the output to get the FPS
-            string[] parts = output.Trim().Split('/');
-
-            double.TryParse(parts[0], out double numerator);
-            double.TryParse(parts[1], out double denominator);
-
-            double fps = numerator / denominator;
-            return fps;
-        }
-
-        private string GetVideoPixelFormat(string videoFilePath)
-        {
-            var process = new Process
-            {
-                StartInfo = new ProcessStartInfo
-                {
-                    FileName = Path.Combine(_ffmpegPath, "ffprobe"),
-                    Arguments = $"-v error -select_streams v:0 -show_entries stream=pix_fmt -of default=noprint_wrappers=1:nokey=1 \"{videoFilePath}\"",
-                    RedirectStandardOutput = true,
-                    UseShellExecute = false,
-                    CreateNoWindow = true
-                }
-            };
-
-            process.Start();
-            string output = process.StandardOutput.ReadToEnd().Trim();
-            process.WaitForExit();
-
-            // Parse the output to get the pixel format
-            string pixelFormat = output.Trim();
-            return pixelFormat;
         }
 
         private string RunFfmpeg(string ffmpegArgs)
@@ -376,13 +214,20 @@ namespace BugRemover
 
         private static void DisplayHelp()
         {
+            Utilities.ConsoleWithLog("");
             Utilities.ConsoleWithLog("BugRemover is a tool to remove bugs from video files.");
             Utilities.ConsoleWithLog("");
             Utilities.ConsoleWithLog("Usage:");
-            Utilities.ConsoleWithLog("  BugRemover -extract <inputfile> <outputfile>");
+            Utilities.ConsoleWithLog("  BugRemover [-extract=frameCount] -ffmpegPath=path -startX=x -startY=y -width=w  -height=h -inFile=VideoFile");
             Utilities.ConsoleWithLog("");
-            Utilities.ConsoleWithLog("Options:");
-            Utilities.ConsoleWithLog("  -extract  Extracts the video from the input file and saves it to the output file.");
+            Utilities.ConsoleWithLog("Parameters:");
+            Utilities.ConsoleWithLog("  -extract=frameCount\t(Optional) Extracts frameCount frames to assist in figure out the bug position parameters.");
+            Utilities.ConsoleWithLog("  -ffmpegPath=path\tThe path of the ffmpeg executable.");
+            Utilities.ConsoleWithLog("  -startX=x\t\tDefines the upper left x-axis position of the square with the bug.");
+            Utilities.ConsoleWithLog("  -startY=y\t\tDefines the upper left y-axis position of the square with the bug.");
+            Utilities.ConsoleWithLog("  -width=w\t\tDefines the width of the square containing the bug.");
+            Utilities.ConsoleWithLog("  -height=h\t\tDefines the height of the square containing the bug.");
+            Utilities.ConsoleWithLog("  -inFile=VideoFile\tThe full path of the video file.");
             Utilities.ConsoleWithLog("");
         }
 
