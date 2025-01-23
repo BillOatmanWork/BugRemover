@@ -1,6 +1,6 @@
 # BugRemover
 BugRemover is a command line utility to remove bugs (logos) from video files. It is written in C# with executables available for multiple operating systems.
-It uses [ffmpeg](https://ffmpeg.org) to generate the subtitles.
+It uses [ffmpeg](https://ffmpeg.org) to make the magic happen..
 
 ## Installation
 - Decompress the proper file for your operating system into a folder. 
