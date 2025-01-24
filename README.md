@@ -8,7 +8,7 @@ It uses [ffmpeg](https://ffmpeg.org) to make the magic happen.
 
 ## Parameters (Case Insensitive)
 - -ffmpegpPath=Path to the ffmpeg executable.  Just the folder, the exe is assumed to be ffmpeg.exe or ffmpeg.
-- -inFile=The video file the to have its bug removed.
+- -inFile=The video file to have its bug removed.
 - -startX=x Defines the upper left x-axis position of the square with the bug.
 - -startY=y Defines the upper left y-axis position of the square with the bug.
 - -width=w Defines the width of the square containing the bug.
