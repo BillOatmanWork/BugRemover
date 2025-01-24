@@ -41,6 +41,8 @@ namespace BugRemover
 
             bool paramsOK = true;
             bool doExtract = false;
+            bool doAutoDetect = false;
+
             foreach (string arg in args)
             {
                 if (arg.ToLower() == "-?" || arg.ToLower() == "-h" || arg.ToLower() == "-help")
@@ -51,6 +53,11 @@ namespace BugRemover
 
                 switch (arg.Substring(0, arg.IndexOf('=')).ToLower())
                 {
+                    case "-autodetect":
+                        Utilities.ConsoleWithLog("Auto detect is not fully implemented yet.");
+                        doAutoDetect = true;
+                        return;
+
                     case "-extract":
                         doExtract = true;
 
@@ -138,15 +145,26 @@ namespace BugRemover
             if (paramsOK == false)
                 return;
 
-            if(startX == -1 || startY == -1 || width == -1 || height == -1)
-            {
-                Utilities.ConsoleWithLog("startX, startY, width and height must all be specified.");
-                DisplayHelp();
-                return;
-            }
-
             Utilities.ConsoleWithLog($"ffmpeg Path: {_ffmpegPath}");
             Utilities.ConsoleWithLog($"Input File: {inFile}");
+
+            if (doAutoDetect)
+            {
+                Utilities.ConsoleWithLog($"Detecting the location of the bugs.");
+
+                List<BugRegion> bugRegions = BugDetection.DetectBugRegions(_ffmpegPath, inFile);
+
+                if (bugRegions.Count == 0)
+                {
+                    Utilities.ConsoleWithLog("No bugs detected.");
+                    return;
+                }
+
+                foreach (BugRegion region in bugRegions)
+                    Utilities.ConsoleWithLog(region.ToString());
+
+                return;
+            }
 
             if (doExtract)
             {
@@ -164,6 +182,13 @@ namespace BugRemover
                 else
                     Utilities.ConsoleWithLog("Error extracting frames.");
 
+                return;
+            }
+
+            if (startX == -1 || startY == -1 || width == -1 || height == -1)
+            {
+                Utilities.ConsoleWithLog("startX, startY, width and height must all be specified.");
+                DisplayHelp();
                 return;
             }
 
@@ -187,7 +212,7 @@ namespace BugRemover
             string outputFile = $"{videoFilePath.FullFileNameWithoutExtention()}_%08d.png";
             string ffmpegArgs = $"-i \"{videoFilePath}\" -vf \"select='lte(n\\,{frameCount - 1})'\" -fps_mode vfr -q:v 2 \"{outputFile}\"";
 
-            RunFfmpeg(ffmpegArgs);
+            Common.RunFfmpeg(_ffmpegPath, ffmpegArgs);
 
             return true;
         }
@@ -207,29 +232,9 @@ namespace BugRemover
             // For debugging, show=1 draws a green box around the bug and -t 15 to only apply to the first 15 seconds of the video
             string ffmpegArgs = $"-i \"{videoFilePath}\" -vf delogo=x={startX}:y={startY}:w={width}:h={height}:show=0 -c:a copy -c:s copy -map 0 -map -0:s:m:language:iso639-2 \"{outputFile}\"";
 
-            RunFfmpeg(ffmpegArgs);
+            Common.RunFfmpeg(_ffmpegPath, ffmpegArgs);
 
             return true;
-        }
-
-        private string RunFfmpeg(string ffmpegArgs)
-        {
-            string output = string.Empty;
-            using (Process ffmpeg = new Process())
-            {
-                ffmpeg.StartInfo.FileName = $"\"{_ffmpegPath}\\ffmpeg\"";
-                ffmpeg.StartInfo.Arguments = ffmpegArgs;
-                ffmpeg.StartInfo.RedirectStandardError = true;
-                ffmpeg.StartInfo.UseShellExecute = false;
-                ffmpeg.StartInfo.CreateNoWindow = true;
-
-                ffmpeg.Start();
-
-                output = ffmpeg.StandardError.ReadToEnd();
-                ffmpeg.WaitForExit();
-            }
-
-            return output;
         }
 
         private static void DisplayHelp()
