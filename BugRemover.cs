@@ -1,6 +1,4 @@
-using System.Diagnostics;
 using System.Globalization;
-
 
 namespace BugRemover
 {
@@ -51,13 +49,15 @@ namespace BugRemover
                     return;
                 }
 
+                if (arg.ToLower() == "-autodetect")
+                {
+                    Utilities.ConsoleWithLog("Auto detect is not fully implemented yet.");
+                    doAutoDetect = true;
+                    continue;
+                }
+
                 switch (arg.Substring(0, arg.IndexOf('=')).ToLower())
                 {
-                    case "-autodetect":
-                        Utilities.ConsoleWithLog("Auto detect is not fully implemented yet.");
-                        doAutoDetect = true;
-                        return;
-
                     case "-extract":
                         doExtract = true;
 

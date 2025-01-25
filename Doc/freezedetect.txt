@@ -1,0 +1,61 @@
+ffmpeg version 2024-10-21-git-baa23e40c1-full_build-www.gyan.dev Copyright (c) 2000-2024 the FFmpeg developers
+  built with gcc 14.2.0 (Rev1, Built by MSYS2 project)
+  configuration: --enable-gpl --enable-version3 --enable-static --disable-w32threads --disable-autodetect --enable-fontconfig --enable-iconv --enable-gnutls --enable-libxml2 --enable-gmp --enable-bzlib --enable-lzma --enable-libsnappy --enable-zlib --enable-librist --enable-libsrt --enable-libssh --enable-libzmq --enable-avisynth --enable-libbluray --enable-libcaca --enable-sdl2 --enable-libaribb24 --enable-libaribcaption --enable-libdav1d --enable-libdavs2 --enable-libopenjpeg --enable-libquirc --enable-libuavs3d --enable-libxevd --enable-libzvbi --enable-libqrencode --enable-librav1e --enable-libsvtav1 --enable-libvvenc --enable-libwebp --enable-libx264 --enable-libx265 --enable-libxavs2 --enable-libxeve --enable-libxvid --enable-libaom --enable-libjxl --enable-libvpx --enable-mediafoundation --enable-libass --enable-frei0r --enable-libfreetype --enable-libfribidi --enable-libharfbuzz --enable-liblensfun --enable-libvidstab --enable-libvmaf --enable-libzimg --enable-amf --enable-cuda-llvm --enable-cuvid --enable-dxva2 --enable-d3d11va --enable-d3d12va --enable-ffnvcodec --enable-libvpl --enable-nvdec --enable-nvenc --enable-vaapi --enable-libshaderc --enable-vulkan --enable-libplacebo --enable-opencl --enable-libcdio --enable-libgme --enable-libmodplug --enable-libopenmpt --enable-libopencore-amrwb --enable-libmp3lame --enable-libshine --enable-libtheora --enable-libtwolame --enable-libvo-amrwbenc --enable-libcodec2 --enable-libilbc --enable-libgsm --enable-liblc3 --enable-libopencore-amrnb --enable-libopus --enable-libspeex --enable-libvorbis --enable-ladspa --enable-libbs2b --enable-libflite --enable-libmysofa --enable-librubberband --enable-libsoxr --enable-chromaprint
+  libavutil      59. 44.100 / 59. 44.100
+  libavcodec     61. 22.100 / 61. 22.100
+  libavformat    61.  9.100 / 61.  9.100
+  libavdevice    61.  4.100 / 61.  4.100
+  libavfilter    10.  6.100 / 10.  6.100
+  libswscale      8.  6.100 /  8.  6.100
+  libswresample   5.  4.100 /  5.  4.100
+  libpostproc    58.  4.100 / 58.  4.100
+Input #0, matroska,webm, from 'C:\TestData\Barbecue Life of Fire S01E07_good.mkv':
+  Metadata:
+    encoder         : libebml v1.4.5 + libmatroska v1.7.1
+    creation_time   : 2025-01-25T17:03:34.000000Z
+  Duration: 00:21:10.04, start: 0.000000, bitrate: 1709 kb/s
+  Stream #0:0: Video: h264 (High), yuv420p(tv, bt709, progressive), 1280x720 [SAR 1:1 DAR 16:9], 59.94 fps, 59.94 tbr, 1k tbn (default)
+    Metadata:
+      BPS             : 1513333
+      DURATION        : 00:21:09.985000000
+      NUMBER_OF_FRAMES: 75912
+      NUMBER_OF_BYTES : 240238849
+      _STATISTICS_WRITING_APP: mkvmerge v89.0 ('And the Melody Still Lingers On (Night in Tunisia)') 64-bit
+      _STATISTICS_WRITING_DATE_UTC: 2025-01-25 17:03:34
+      _STATISTICS_TAGS: BPS DURATION NUMBER_OF_FRAMES NUMBER_OF_BYTES
+  Stream #0:1(eng): Audio: ac3, 48000 Hz, stereo, fltp, 192 kb/s
+    Metadata:
+      BPS             : 192000
+      DURATION        : 00:21:10.016000000
+      NUMBER_OF_FRAMES: 39688
+      NUMBER_OF_BYTES : 30480384
+      _STATISTICS_WRITING_APP: mkvmerge v89.0 ('And the Melody Still Lingers On (Night in Tunisia)') 64-bit
+      _STATISTICS_WRITING_DATE_UTC: 2025-01-25 17:03:34
+      _STATISTICS_TAGS: BPS DURATION NUMBER_OF_FRAMES NUMBER_OF_BYTES
+  Stream #0:2(eng): Subtitle: subrip (srt)
+    Metadata:
+      BPS             : 128
+      DURATION        : 00:21:10.040000000
+      NUMBER_OF_FRAMES: 651
+      NUMBER_OF_BYTES : 20396
+      _STATISTICS_WRITING_APP: mkvmerge v89.0 ('And the Melody Still Lingers On (Night in Tunisia)') 64-bit
+      _STATISTICS_WRITING_DATE_UTC: 2025-01-25 17:03:34
+      _STATISTICS_TAGS: BPS DURATION NUMBER_OF_FRAMES NUMBER_OF_BYTES
+Stream mapping:
+  Stream #0:0 -> #0:0 (h264 (native) -> wrapped_avframe (native))
+Press [q] to stop, [?] for help
+Output #0, null, to 'pipe:':
+  Metadata:
+    encoder         : Lavf61.9.100
+  Stream #0:0: Video: wrapped_avframe, yuv420p(tv, bt709, progressive), 1280x720 [SAR 1:1 DAR 16:9], q=2-31, 200 kb/s, 59.94 fps, 59.94 tbn (default)
+    Metadata:
+      encoder         : Lavc61.22.100 wrapped_avframe
+      BPS             : 1513333
+      DURATION        : 00:21:09.985000000
+      NUMBER_OF_FRAMES: 75912
+      NUMBER_OF_BYTES : 240238849
+      _STATISTICS_WRITING_APP: mkvmerge v89.0 ('And the Melody Still Lingers On (Night in Tunisia)') 64-bit
+      _STATISTICS_WRITING_DATE_UTC: 2025-01-25 17:03:34
+      _STATISTICS_TAGS: BPS DURATION NUMBER_OF_FRAMES NUMBER_OF_BYTES
+frame= 1371 fps=0.0 q=-0.0 size=N/A time=00:00:22.85 bitrate=N/A speed=44.7x    frame= 2679 fps=2590 q=-0.0 size=N/A time=00:00:44.26 bitrate=N/A speed=42.8x    frame= 3911 fps=2513 q=-0.0 size=N/A time=00:01:05.21 bitrate=N/A speed=41.9x    frame= 5206 fps=2510 q=-0.0 size=N/A time=00:01:26.83 bitrate=N/A speed=41.9x    frame= 6521 fps=2521 q=-0.0 size=N/A time=00:01:48.79 bitrate=N/A speed=42.1x    frame= 7818 fps=2519 q=-0.0 size=N/A time=00:02:10.39 bitrate=N/A speed=  42x    frame= 9196 fps=2541 q=-0.0 size=N/A time=00:02:33.40 bitrate=N/A speed=42.4x    frame=10438 fps=2524 q=-0.0 size=N/A time=00:02:54.15 bitrate=N/A speed=42.1x    frame=11477 fps=2469 q=-0.0 size=N/A time=00:03:11.47 bitrate=N/A speed=41.2x    frame=12637 fps=2449 q=-0.0 size=N/A time=00:03:30.82 bitrate=N/A speed=40.9x    frame=13895 fps=2445 q=-0.0 size=N/A time=00:03:51.78 bitrate=N/A speed=40.8x    frame=15147 fps=2443 q=-0.0 size=N/A time=00:04:12.60 bitrate=N/A speed=40.7x    frame=16310 fps=2432 q=-0.0 size=N/A time=00:04:32.12 bitrate=N/A speed=40.6x    frame=17489 fps=2421 q=-0.0 size=N/A time=00:04:51.79 bitrate=N/A speed=40.4x    frame=18847 fps=2431 q=-0.0 size=N/A time=00:05:14.43 bitrate=N/A speed=40.6x    frame=20080 fps=2431 q=-0.0 size=N/A time=00:05:35.01 bitrate=N/A speed=40.6x    frame=21169 fps=2414 q=-0.0 size=N/A time=00:05:53.18 bitrate=N/A speed=40.3x    frame=22421 fps=2412 q=-0.0 size=N/A time=00:06:14.05 bitrate=N/A speed=40.2x    frame=23538 fps=2401 q=-0.0 size=N/A time=00:06:32.70 bitrate=N/A speed=40.1x    frame=24863 fps=2409 q=-0.0 size=N/A time=00:06:54.81 bitrate=N/A speed=40.2x    frame=26149 fps=2412 q=-0.0 size=N/A time=00:07:16.80 bitrate=N/A speed=40.3x    frame=27365 fps=2411 q=-0.0 size=N/A time=00:07:37.72 bitrate=N/A speed=40.3x    frame=28625 fps=2411 q=-0.0 size=N/A time=00:07:58.74 bitrate=N/A speed=40.3x    frame=29847 fps=2411 q=-0.0 size=N/A time=00:08:19.11 bitrate=N/A speed=40.3x    frame=30979 fps=2403 q=-0.0 size=N/A time=00:08:38.01 bitrate=N/A speed=40.2x    frame=32164 fps=2397 q=-0.0 size=N/A time=00:08:57.78 bitrate=N/A speed=40.1x    frame=33408 fps=2399 q=-0.0 size=N/A time=00:09:18.54 bitrate=N/A speed=40.1x    frame=34672 fps=2400 q=-0.0 size=N/A time=00:09:39.62 bitrate=N/A speed=40.1x    frame=35879 fps=2399 q=-0.0 size=N/A time=00:09:59.71 bitrate=N/A speed=40.1x    frame=37121 fps=2398 q=-0.0 size=N/A time=00:10:20.45 bitrate=N/A speed=40.1x    frame=38150 fps=2385 q=-0.0 size=N/A time=00:10:37.63 bitrate=N/A speed=39.9x    frame=39276 fps=2379 q=-0.0 size=N/A time=00:10:56.37 bitrate=N/A speed=39.8x    frame=40582 fps=2384 q=-0.0 size=N/A time=00:11:18.22 bitrate=N/A speed=39.8x    frame=41788 fps=2382 q=-0.0 size=N/A time=00:11:38.33 bitrate=N/A speed=39.8x    frame=43046 fps=2385 q=-0.0 size=N/A time=00:11:59.26 bitrate=N/A speed=39.8x    frame=44401 fps=2391 q=-0.0 size=N/A time=00:12:21.90 bitrate=N/A speed=  40x    frame=45662 fps=2393 q=-0.0 size=N/A time=00:12:42.96 bitrate=N/A speed=  40x    frame=46886 fps=2392 q=-0.0 size=N/A time=00:13:03.38 bitrate=N/A speed=  40x    frame=48133 fps=2392 q=-0.0 size=N/A time=00:13:24.18 bitrate=N/A speed=  40x    frame=49185 fps=2384 q=-0.0 size=N/A time=00:13:41.75 bitrate=N/A speed=39.8x    frame=50251 fps=2377 q=-0.0 size=N/A time=00:13:59.53 bitrate=N/A speed=39.7x    frame=51541 fps=2378 q=-0.0 size=N/A time=00:14:22.24 bitrate=N/A speed=39.8x    frame=52733 fps=2376 q=-0.0 size=N/A time=00:14:42.11 bitrate=N/A speed=39.8x    frame=53857 fps=2371 q=-0.0 size=N/A time=00:15:00.88 bitrate=N/A speed=39.7x    frame=55046 fps=2370 q=-0.0 size=N/A time=00:15:20.71 bitrate=N/A speed=39.6x    frame=56096 fps=2363 q=-0.0 size=N/A time=00:15:38.22 bitrate=N/A speed=39.5x    frame=57287 fps=2362 q=-0.0 size=N/A time=00:15:58.10 bitrate=N/A speed=39.5x    frame=58584 fps=2365 q=-0.0 size=N/A time=00:16:19.74 bitrate=N/A speed=39.6x    frame=59669 fps=2359 q=-0.0 size=N/A time=00:16:37.83 bitrate=N/A speed=39.5x    frame=60820 fps=2357 q=-0.0 size=N/A time=00:16:56.96 bitrate=N/A speed=39.4x    frame=62182 fps=2362 q=-0.0 size=N/A time=00:17:20.87 bitrate=N/A speed=39.5x    frame=63351 fps=2361 q=-0.0 size=N/A time=00:17:40.35 bitrate=N/A speed=39.5x    frame=64577 fps=2361 q=-0.0 size=N/A time=00:18:00.89 bitrate=N/A speed=39.5x    frame=65744 fps=2360 q=-0.0 size=N/A time=00:18:20.34 bitrate=N/A speed=39.5x    frame=66974 fps=2359 q=-0.0 size=N/A time=00:18:40.88 bitrate=N/A speed=39.5x    frame=68034 fps=2354 q=-0.0 size=N/A time=00:18:58.55 bitrate=N/A speed=39.4x    frame=69138 fps=2350 q=-0.0 size=N/A time=00:19:16.98 bitrate=N/A speed=39.3x    frame=70232 fps=2346 q=-0.0 size=N/A time=00:19:35.19 bitrate=N/A speed=39.3x    frame=71382 fps=2344 q=-0.0 size=N/A time=00:19:54.39 bitrate=N/A speed=39.2x    frame=72538 fps=2342 q=-0.0 size=N/A time=00:20:13.71 bitrate=N/A speed=39.2x    frame=73625 fps=2338 q=-0.0 size=N/A time=00:20:31.84 bitrate=N/A speed=39.1x    frame=74542 fps=2329 q=-0.0 size=N/A time=00:20:47.11 bitrate=N/A speed=  39x    frame=75420 fps=2319 q=-0.0 size=N/A time=00:21:01.77 bitrate=N/A speed=38.8x    [out#0/null @ 0000019f92c83940] video:32618KiB audio:0KiB subtitle:0KiB other streams:0KiB global headers:0KiB muxing overhead: unknown
+frame=75912 fps=2317 q=-0.0 Lsize=N/A time=00:21:10.00 bitrate=N/A speed=38.8x    

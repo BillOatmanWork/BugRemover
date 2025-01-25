@@ -2,7 +2,7 @@
   "profiles": {
     "BugRemover": {
       "commandName": "Project",
-      "commandLineArgs": "-ffmpegpath=\"C:\\ffmpeg\\bin\" -infile=\"C:\\Stuff\\Recordings\\Molly Cooper Gives Best Friend JOI.mkv\" -startx=623 -starty=425 -width=218 -height=33 "
+      "commandLineArgs": "-ffmpegpath=\"C:\\ffmpeg\\bin\" -infile=\"C:\\TestData\\Barbecue Life of Fire S01E07_good.mkv\" -autodetect -startx=623 -starty=425 -width=218 -height=33 "
     }
   }
 }

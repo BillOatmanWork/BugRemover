@@ -8,17 +8,18 @@ namespace BugRemover
     /// </summary>
     public static class BugDetection
     {
-        public static List<BugRegion> DetectBugRegions(string ffmpegPath, string inputFilePath, int staticFrameThreshold=10)
+        public static List<BugRegion> DetectBugRegions(string ffmpegPath, string inputFilePath, double staticFrameThreshold = 0.01, double logoDurationThreshold = 5)
         {
             double frameRate = GetFrameRate(ffmpegPath, inputFilePath);
 
-            string arguments = $"-i {inputFilePath} -vf \"freezedetect=n={staticFrameThreshold}:d=2\" -an -f null -";
+            // Adjust the ffmpeg arguments to use the freezedetect filter for detecting static regions
+            string arguments = $"-i \"{inputFilePath}\" -vf \"freezedetect=n={staticFrameThreshold}:d={logoDurationThreshold}\" -an -f null -";
             string output = Common.RunFfmpeg(ffmpegPath, arguments);
 
             // Dump FFmpeg output to a file
             File.WriteAllText(@"..\..\..\Doc\freezedetect.txt", output);
 
-            List<BugRegion> BugRegions = new List<BugRegion>();
+            List<BugRegion> bugRegions = new List<BugRegion>();
 
             string[] lines = output.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
             double startTime = 0;
@@ -40,7 +41,7 @@ namespace BugRemover
                     int width = ExtractValue(line, "w");
                     int height = ExtractValue(line, "h");
 
-                    BugRegions.Add(new BugRegion
+                    bugRegions.Add(new BugRegion
                     {
                         StartFrame = startFrame,
                         EndFrame = endFrame,
@@ -52,7 +53,7 @@ namespace BugRemover
                 }
             }
 
-            return BugRegions;
+            return bugRegions;
         }
 
         private static double GetFrameRate(string ffmpegPath, string inputFilePath)
@@ -89,7 +90,6 @@ namespace BugRemover
             }
             return 0;
         }
-
     }
 
     public class BugRegion

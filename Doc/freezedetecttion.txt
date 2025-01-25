@@ -1,0 +1,73 @@
+public static void Main()
+{
+    string ffmpegPath = "path/to/ffmpeg.exe";
+    string inputFilePath = "C:\\TestData\\Barbecue Life of Fire S01E07_good.mkv";
+    string outputDir = "path/to/output/frames";
+    int frameRate = 1; // Frames per second for extraction
+
+    // Step 1: Extract frames
+    ExtractFrames(ffmpegPath, inputFilePath, outputDir, frameRate);
+
+    // Step 2: Detect static regions
+    List<string> staticRegions = DetectStaticRegions(outputDir);
+
+    // Print detected static regions
+    foreach (var region in staticRegions)
+    {
+        Console.WriteLine($"Static region detected: {region}");
+    }
+}
+
+using System.Diagnostics;
+
+public static void ExtractFrames(string ffmpegPath, string inputFilePath, string outputDir, int frameRate)
+{
+    string arguments = $"-i \"{inputFilePath}\" -vf fps={frameRate} \"{outputDir}/frame_%04d.png\"";
+    Process process = new Process();
+    process.StartInfo.FileName = ffmpegPath;
+    process.StartInfo.Arguments = arguments;
+    process.StartInfo.UseShellExecute = false;
+    process.StartInfo.RedirectStandardOutput = true;
+    process.StartInfo.RedirectStandardError = true;
+    process.Start();
+    process.WaitForExit();
+}
+
+Install-Package OpenCvSharp4
+
+using OpenCvSharp;
+using System.Collections.Generic;
+
+public static List<string> DetectStaticRegions(string outputDir, double threshold = 0.01)
+{
+    List<string> staticRegions = new List<string>();
+    Mat prevFrame = null;
+    int frameCount = Directory.GetFiles(outputDir, "frame_*.png").Length;
+
+    for (int i = 1; i <= frameCount; i++)
+    {
+        string currFramePath = $"{outputDir}/frame_{i:0000}.png";
+        Mat currFrame = Cv2.ImRead(currFramePath, ImreadModes.Color);
+
+        if (prevFrame != null)
+        {
+            Mat diff = new Mat();
+            Cv2.Absdiff(prevFrame, currFrame, diff);
+            Mat grayDiff = new Mat();
+            Cv2.CvtColor(diff, grayDiff, ColorConversionCodes.BGR2GRAY);
+            Cv2.Threshold(grayDiff, grayDiff, 25, 255, ThresholdTypes.Binary);
+            double nonZeroCount = Cv2.CountNonZero(grayDiff);
+            double totalPixels = grayDiff.Rows * grayDiff.Cols;
+
+            if (nonZeroCount / totalPixels < threshold)
+            {
+                staticRegions.Add(currFramePath);
+            }
+        }
+
+        prevFrame = currFrame.Clone();
+    }
+
+    return staticRegions;
+}
+
