@@ -3,7 +3,6 @@ using System.Globalization;
 namespace BugRemover
 {
 
-    // Switch to 
     public class BugRemover
     {
         private string _ffmpegPath = string.Empty;
@@ -30,6 +29,7 @@ namespace BugRemover
             Utilities.ConsoleWithLog("");
         
             string inFile = string.Empty;
+            string replaceFile = string.Empty;
             int framesToExtract = 0;
             bool found;
             int startX = -1;
@@ -86,6 +86,16 @@ namespace BugRemover
                         if(!File.Exists($"{inFile}"))
                         {
                             Utilities.ConsoleWithLog($"Input file specified not found {inFile}.");
+                            DisplayHelp();
+                            return;
+                        }
+                        break;
+
+                    case "-replacefile":
+                        replaceFile = arg.Substring(arg.IndexOf('=') + 1).Trim();
+                        if (!File.Exists($"{replaceFile}"))
+                        {
+                            Utilities.ConsoleWithLog($"Replacement file specified not found {replaceFile}.");
                             DisplayHelp();
                             return;
                         }
@@ -198,11 +208,20 @@ namespace BugRemover
             Utilities.ConsoleWithLog($"Bug Width: {width}");
             Utilities.ConsoleWithLog("");
 
-            string outputFile = $"{inFile.FullFileNameWithoutExtention()}_bugFree.mkv";
+            string outputFile;
 
-            Utilities.ConsoleWithLog("Starting the bug removal process ...");
-
-            RemoveTheBug(inFile, outputFile, startX, startY, width, height);
+            if (!string.IsNullOrEmpty(replaceFile))
+            {
+                outputFile = $"{inFile.FullFileNameWithoutExtention()}_newBug.mp4";
+                Utilities.ConsoleWithLog("Starting the bug replacement process ...");
+                ReplaceTheBug(inFile, outputFile, replaceFile, startX, startY);                  
+            }
+            else
+            {
+                outputFile = $"{inFile.FullFileNameWithoutExtention()}_bugFree.mp4";
+                Utilities.ConsoleWithLog("Starting the bug removal process ...");
+                RemoveTheBug(inFile, outputFile, startX, startY, width, height);
+            }
 
             Utilities.ConsoleWithLog($"All done. {outputFile} created.");
         }
@@ -237,10 +256,19 @@ namespace BugRemover
             return true;
         }
 
+        private bool ReplaceTheBug(string videoFilePath, string outputFile, string newLogoPath, int startX, int startY)
+        {
+            string ffmpegArgs = $"-i \"{videoFilePath}\" -i \"{newLogoPath}\" -filter_complex \"[0:v][1:v] overlay={startX}:{startY}\" -c:a copy \"{outputFile}\"";
+
+            Common.RunFfmpeg(_ffmpegPath, ffmpegArgs);
+
+            return true;
+        }
+
         private static void DisplayHelp()
         {
             Utilities.ConsoleWithLog("");
-            Utilities.ConsoleWithLog("BugRemover is a tool to remove bugs from video files.");
+            Utilities.ConsoleWithLog("BugRemover is a tool to remove or replace bugs in video files.");
             Utilities.ConsoleWithLog("");
             Utilities.ConsoleWithLog("Usage:");
             Utilities.ConsoleWithLog("  BugRemover [-extract=frameCount] -ffmpegPath=path -startX=x -startY=y -width=w  -height=h -inFile=VideoFile");

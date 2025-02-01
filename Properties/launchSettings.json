@@ -2,7 +2,7 @@
   "profiles": {
     "BugRemover": {
       "commandName": "Project",
-      "commandLineArgs": "-ffmpegpath=\"C:\\ffmpeg\\bin\" -infile=\"C:\\TestData\\Barbecue Life of Fire S01E07_good.mkv\" -autodetect -startx=623 -starty=425 -width=218 -height=33 "
+      "commandLineArgs": "-ffmpegpath=\"C:\\ffmpeg\\bin\" -infile=\"C:\\Stuff\\Recordings\\SidneyB Playing_10-30-14.mp4\" -startx=515 -starty=390 -width=325 -height=80 -replaceFile=\"C:\\Stuff\\Recordings\\SidneyB Logo.png\""
     }
   }
 }
